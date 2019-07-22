@@ -1,0 +1,78 @@
+---
+title: "metaRbolomics dependencies"
+author: "Steffen Neumann"
+date: "August 26, 2016"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options("repos" = list(CRAN="http://cran.rstudio.com/"))
+
+library(devtools)
+library(miniCRAN)
+library(igraph)
+library(visNetwork)
+source("miniMetabolomicsHelper.R")
+
+```
+
+
+```{r packages}
+
+url="http://www.bioconductor.org/packages/3.9/bioc/"
+
+all_pkgs <- biocAndCranPackages(bioc_url=url)
+views <- c("Metabolomics", "Cheminformatics", "Lipidomics", "SystemsBiology")
+
+packagesAndViews <- allPackagesInViews(url)
+
+vpkgs <- lapply(views, function(view) packagesInView(view, packagesAndViews=packagesAndViews))
+names(vpkgs) <- views
+```
+
+
+```{r revPakages}
+
+pkgs <- unlist(vpkgs)
+
+## Remove limma for the package list, 
+## which would dominate the network
+pkgs <- pkgs[! pkgs %in% "limma"]
+  
+el <- sapply(pkgs, function(pkg) {
+             rd <- revdep(pkg, dependencies = c("Depends", "Imports", "Suggests", "LinkingTo"), 
+                          recursive = FALSE, ignore = NULL, bioconductor = TRUE)
+             as.matrix(cbind(Package=rep(pkg, length.out=length(rd)), ReverseDep=rd))
+             })
+el <- do.call(rbind, el)
+
+g <- graph_from_edgelist(el, directed = TRUE)
+
+gd <- get.data.frame(g, what = "both" )
+nodes <- with(gd[["vertices"]],
+              data.frame(id =  name))
+
+vn <- visNetwork(
+  nodes = nodes, 
+  edges = gd[["edges"]]
+) %>% 
+  visPhysics(timestep = 0.3) %>% 
+  visOptions(highlightNearest = TRUE)
+
+```
+
+```{r vis}
+vn
+```
+
+
+## SessionInfo
+
+This page was created with the following packages:
+
+```{r sessionInfo}
+sessionInfo()
+```
