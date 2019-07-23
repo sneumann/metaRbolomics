@@ -3,11 +3,11 @@ title: "metaRbolomics dependencies"
 author: "Steffen Neumann"
 date: "August 26, 2016"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 
-```{r setup, include=FALSE}
+```{r setup, cache=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
 options("repos" = list(CRAN="http://cran.rstudio.com/"))
 
@@ -20,7 +20,7 @@ source("miniMetabolomicsHelper.R")
 ```
 
 
-```{r packages}
+```{r packages, cache=TRUE}
 
 url="http://www.bioconductor.org/packages/3.9/bioc/"
 
@@ -34,13 +34,13 @@ names(vpkgs) <- views
 ```
 
 
-```{r revPakages}
+```{r revGraph, cache=TRUE}
 
 pkgs <- unlist(vpkgs)
 
 ## Remove limma for the package list, 
 ## which would dominate the network
-pkgs <- pkgs[! pkgs %in% "limma"]
+pkgs <- pkgs[! pkgs %in% c("limma", "edgeR")]
   
 el <- sapply(pkgs, function(pkg) {
              rd <- revdep(pkg, dependencies = c("Depends", "Imports", "Suggests", "LinkingTo"), 
@@ -50,22 +50,44 @@ el <- sapply(pkgs, function(pkg) {
 el <- do.call(rbind, el)
 
 g <- graph_from_edgelist(el, directed = TRUE)
+g <- simplify(g, remove.multiple = TRUE, remove.loops = TRUE)
 
-gd <- get.data.frame(g, what = "both" )
-nodes <- with(gd[["vertices"]],
-              data.frame(id =  name))
+l <-layout_with_fr(g, weights=rep(20, length.out=length(E(g))))
+                   
+plot.igraph(g, asp=0.3, layout=l, 
+            edge.arrow.size = 0,
+            vertex.size=.5,
+            vertex.label.cex = 0.4, 
+            vertex.label.degree = -pi/2)
 
-vn <- visNetwork(
-  nodes = nodes, 
-  edges = gd[["edges"]]
-) %>% 
+```
+```{r revVisNetwork, cache=TRUE}
+
+# get data and plot :
+data <- toVisNetworkData(g)
+vn <- visNetwork(nodes = data$nodes, 
+                 edges = data$edges
+                 ) %>% 
   visPhysics(timestep = 0.3) %>% 
   visOptions(highlightNearest = TRUE)
 
-```
+vn <- visIgraph(g, idToLabel = TRUE, layout = "layout_nicely",
+  physics = FALSE, smooth = FALSE, type = "square",
+  randomSeed = NULL, layoutMatrix = NULL, asp=2)
 
+```
 ```{r vis}
 vn
+```
+
+```{r fileVis}
+library(networkD3)
+library(webshot)
+saveNetwork(vn, "vn.html")
+webshot("vn.html", "revDepNet-10.png", delay = 10)
+webshot("vn.html", "revDepNet-30.png", delay = 30)
+webshot("vn.html", "revDepNet-100.png", delay = 100)
+webshot("vn.html", "revDepNet-200.png", delay = 200)
 ```
 
 
