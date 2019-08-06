@@ -15,44 +15,23 @@ library(devtools)
 library(miniCRAN)
 library(igraph)
 library(visNetwork)
-source("miniMetabolomicsHelper.R")
+library(networkD3)
+library(webshot)
+library(png)
+
+#source("miniMetabolomicsHelper.R")
 
 ```
 
 
 ```{r packages, cache=TRUE}
 
-# url="http://www.bioconductor.org/packages/3.9/bioc/"
-# 
-# all_pkgs <- biocAndCranPackages(bioc_url=url)
-# views <- c("Metabolomics", "Cheminformatics", "Lipidomics", "SystemsBiology")
-# 
-# packagesAndViews <- allPackagesInViews(url)
-# 
-# vpkgs <- lapply(views, function(view) packagesInView(view, packagesAndViews=packagesAndViews))
-# names(vpkgs) <- views
-# 
-# pkgs <- unlist(vpkgs)
-
 ## Read package names from our tables in the review
 ##
 reviewTables <- read.delim("AllMetaRbolomicsTables.csv", stringsAsFactors = FALSE)
 reviewPkgs <- reviewTables[,"Package"]
-length(reviewPkgs)
 
 pkgs <- reviewPkgs
-
-## Remove limma for the package list, 
-## which would dominate the network
-pkgs <- pkgs[! pkgs %in% c("limma", "edgeR")]
-pkgs <- pkgs[! pkgs %in% c("Rcpp", "igraph", "vegan", "caret", "rJava")]
-```
-
-
-```{r revGraph, cache=TRUE}
-
-#  rd <- revdep(pkg, dependencies = c("Depends"), 
-#  rd <- revdep(pkg, dependencies = c("Depends", "Imports", "Suggests", "LinkingTo"), 
 
 el <- sapply(pkgs, function(pkg) {
   rd <- revdep(pkg, dependencies = c("Depends", "Imports", "LinkingTo"), 
@@ -60,23 +39,25 @@ el <- sapply(pkgs, function(pkg) {
   as.matrix(cbind(Package=rep(pkg, length.out=length(rd)), ReverseDep=rd))
 })
 el <- do.call(rbind, el)
-
-g <- graph_from_edgelist(el, directed = TRUE)
-g <- simplify(g, remove.multiple = TRUE, remove.loops = TRUE)
-
-#l <-layout_with_fr(g, weights=rep(20, length.out=length(E(g))))
-
 ```
 
 In total, we were analysing `r length(pkgs)` packages.
-For each package, this returns the set of packages in CRAN or BioC that depend on, import from or link to the package (i.e., its direct reverse dependencies) using the `devtools::revdep()` function. It was not possible to detect reverse dependencies from other hosting places such as GitHub or GitLab. 
+For each package, this returns the set of packages in CRAN or BioC that depend on, import from or link to the package (i.e., its direct reverse dependencies) using the `devtools::revdep()` function. A few packages with the highest number of reverse dependencies have been excluded, as they would dominate the visualisation. 
+It was not possible to detect reverse dependencies from other hosting places such as GitHub or GitLab. 
 
 From the total, `r length(unique(el[,"Package"]))` packages had at least one 
 such reverse dependency.
 
-
-
 ```{r revVisNetwork, cache=TRUE}
+
+## Remove packages with most reverse dependencies 
+## which would dominate the network
+
+el <- el[! el[,"Package"] %in% c("Rcpp", "igraph", "vegan", "caret", "rJava"), ]
+
+## Create graph, and simplify redundancy
+g <- graph_from_edgelist(el, directed = TRUE)
+g <- simplify(g, remove.multiple = TRUE, remove.loops = TRUE)
 
 # get data and plot :
 data <- toVisNetworkData(g)
@@ -97,33 +78,21 @@ vn <- visNetwork(nodes = data$nodes,
 vn
 ```
 
-```{r vn2}
-vn2 <- visIgraph(g, idToLabel = TRUE, layout = "layout_nicely",
-  physics = FALSE, smooth = FALSE, type = "square",
-  randomSeed = NULL, layoutMatrix = NULL)
-vn2$x$nodes <- cbind(vn2$x$nodes, font.size = 50)
-vn2
-```
+In the above figure, the packages with reverse dependencies 
+from the review are shown as blue nodes. Their (reverse) dependencies 
+from CRAN and BioC are shown in green.
 
 ```{r fileVis}
-library(networkD3)
-library(webshot)
+
 saveNetwork(vn, "vn.html")
-#webshot("vn.html", "revDepNet-10.png", delay = 10)
-#webshot("vn.html", "revDepNet-30.png", delay = 30)
-webshot("vn.html", "revDepNet-100.png", 
-        vwidth = 2000, vheight = 1488,
-        delay = 100)
-#webshot("vn.html", "revDepNet-200.png", delay = 200)
+webshot("vn.html", "revDepNet-60.png", delay = 60)
+
+## Display bitmap network
+pp <- readPNG("revDepNet-60.png")
+plot.new() 
+rasterImage(pp,0,0,1,1)
+
 ```
-
-
-```{r loadMetaRbolomics}
-reviewTables <- read.delim("AllMetaRbolomicsTables.csv", stringsAsFactors = FALSE)
-reviewPkgs <- reviewTables[,"Package"]
-length(reviewPkgs)
-```
-
 
 This page was created with the following packages:
 
