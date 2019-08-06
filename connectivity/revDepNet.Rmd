@@ -22,76 +22,108 @@ source("miniMetabolomicsHelper.R")
 
 ```{r packages, cache=TRUE}
 
-url="http://www.bioconductor.org/packages/3.9/bioc/"
+# url="http://www.bioconductor.org/packages/3.9/bioc/"
+# 
+# all_pkgs <- biocAndCranPackages(bioc_url=url)
+# views <- c("Metabolomics", "Cheminformatics", "Lipidomics", "SystemsBiology")
+# 
+# packagesAndViews <- allPackagesInViews(url)
+# 
+# vpkgs <- lapply(views, function(view) packagesInView(view, packagesAndViews=packagesAndViews))
+# names(vpkgs) <- views
+# 
+# pkgs <- unlist(vpkgs)
 
-all_pkgs <- biocAndCranPackages(bioc_url=url)
-views <- c("Metabolomics", "Cheminformatics", "Lipidomics", "SystemsBiology")
+## Read package names from our tables in the review
+##
+reviewTables <- read.delim("AllMetaRbolomicsTables.csv", stringsAsFactors = FALSE)
+reviewPkgs <- reviewTables[,"Package"]
+length(reviewPkgs)
 
-packagesAndViews <- allPackagesInViews(url)
+pkgs <- reviewPkgs
 
-vpkgs <- lapply(views, function(view) packagesInView(view, packagesAndViews=packagesAndViews))
-names(vpkgs) <- views
+## Remove limma for the package list, 
+## which would dominate the network
+pkgs <- pkgs[! pkgs %in% c("limma", "edgeR")]
+pkgs <- pkgs[! pkgs %in% c("Rcpp", "igraph", "vegan", "caret", "rJava")]
 ```
 
 
 ```{r revGraph, cache=TRUE}
 
-pkgs <- unlist(vpkgs)
+#  rd <- revdep(pkg, dependencies = c("Depends"), 
+#  rd <- revdep(pkg, dependencies = c("Depends", "Imports", "Suggests", "LinkingTo"), 
 
-## Remove limma for the package list, 
-## which would dominate the network
-pkgs <- pkgs[! pkgs %in% c("limma", "edgeR")]
-  
 el <- sapply(pkgs, function(pkg) {
-             rd <- revdep(pkg, dependencies = c("Depends", "Imports", "Suggests", "LinkingTo"), 
-                          recursive = FALSE, ignore = NULL, bioconductor = TRUE)
-             as.matrix(cbind(Package=rep(pkg, length.out=length(rd)), ReverseDep=rd))
-             })
+  rd <- revdep(pkg, dependencies = c("Depends", "Imports", "LinkingTo"), 
+               recursive = FALSE, ignore = NULL, bioconductor = TRUE)
+  as.matrix(cbind(Package=rep(pkg, length.out=length(rd)), ReverseDep=rd))
+})
 el <- do.call(rbind, el)
 
 g <- graph_from_edgelist(el, directed = TRUE)
 g <- simplify(g, remove.multiple = TRUE, remove.loops = TRUE)
 
-l <-layout_with_fr(g, weights=rep(20, length.out=length(E(g))))
-                   
-plot.igraph(g, asp=0.3, layout=l, 
-            edge.arrow.size = 0,
-            vertex.size=.5,
-            vertex.label.cex = 0.4, 
-            vertex.label.degree = -pi/2)
+#l <-layout_with_fr(g, weights=rep(20, length.out=length(E(g))))
 
 ```
+
+In total, we were analysing `r length(pkgs)` packages.
+For each package, this returns the set of packages in CRAN or BioC that depend on, import from or link to the package (i.e., its direct reverse dependencies) using the `devtools::revdep()` function. It was not possible to detect reverse dependencies from other hosting places such as GitHub or GitLab. 
+
+From the total, `r length(unique(el[,"Package"]))` packages had at least one 
+such reverse dependency.
+
+
+
 ```{r revVisNetwork, cache=TRUE}
 
 # get data and plot :
 data <- toVisNetworkData(g)
+
+data$nodes <- cbind(data$nodes, 
+                    font.size=30, 
+                    color.background = ifelse(data$nodes[,"id"] %in% pkgs , 
+                           rgb(0, 0, 200, 128, max = 255), 
+                           rgb(0, 200, 0, 128, max = 255)))
+
 vn <- visNetwork(nodes = data$nodes, 
                  edges = data$edges
                  ) %>% 
-  visPhysics(timestep = 0.3) %>% 
+  visPhysics(timestep = 0.3,
+             barnesHut = list(centralGravity=0.35,
+                              springLength = 95)) %>% 
   visOptions(highlightNearest = TRUE)
-
-vn <- visIgraph(g, idToLabel = TRUE, layout = "layout_nicely",
-  physics = FALSE, smooth = FALSE, type = "square",
-  randomSeed = NULL, layoutMatrix = NULL, asp=2)
-
-```
-```{r vis}
 vn
+```
+
+```{r vn2}
+vn2 <- visIgraph(g, idToLabel = TRUE, layout = "layout_nicely",
+  physics = FALSE, smooth = FALSE, type = "square",
+  randomSeed = NULL, layoutMatrix = NULL)
+vn2$x$nodes <- cbind(vn2$x$nodes, font.size = 50)
+vn2
 ```
 
 ```{r fileVis}
 library(networkD3)
 library(webshot)
 saveNetwork(vn, "vn.html")
-webshot("vn.html", "revDepNet-10.png", delay = 10)
-webshot("vn.html", "revDepNet-30.png", delay = 30)
-webshot("vn.html", "revDepNet-100.png", delay = 100)
-webshot("vn.html", "revDepNet-200.png", delay = 200)
+#webshot("vn.html", "revDepNet-10.png", delay = 10)
+#webshot("vn.html", "revDepNet-30.png", delay = 30)
+webshot("vn.html", "revDepNet-100.png", 
+        vwidth = 2000, vheight = 1488,
+        delay = 100)
+#webshot("vn.html", "revDepNet-200.png", delay = 200)
 ```
 
 
-## SessionInfo
+```{r loadMetaRbolomics}
+reviewTables <- read.delim("AllMetaRbolomicsTables.csv", stringsAsFactors = FALSE)
+reviewPkgs <- reviewTables[,"Package"]
+length(reviewPkgs)
+```
+
 
 This page was created with the following packages:
 
