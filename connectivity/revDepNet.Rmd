@@ -11,15 +11,13 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 options("repos" = list(CRAN="http://cran.rstudio.com/"))
 
-library(devtools)
-library(miniCRAN)
-library(igraph)
-library(visNetwork)
-library(networkD3)
-library(webshot)
-library(png)
-
-#source("miniMetabolomicsHelper.R")
+library(devtools)   # for revdp()
+#library(miniCRAN)  
+library(igraph)     # for graph_from_edgelist/( and simplify() )
+library(visNetwork) # for visNetwork() and friends
+library(networkD3)  # for saveNetwork()
+library(webshot2)   # for webshot()
+library(png)        # For displaying an image
 
 ```
 
@@ -69,13 +67,16 @@ data$nodes <- cbind(data$nodes,
                            rgb(0, 200, 0, 128, max = 255)))
 
 vn <- visNetwork(nodes = data$nodes, 
-                 edges = data$edges
+                 edges = data$edges,
+                 width=1000, height=1000,
                  ) %>% 
   visPhysics(timestep = 0.3,
              barnesHut = list(centralGravity=0.35,
                               springLength = 95)) %>% 
   visOptions(highlightNearest = TRUE)
+
 vn
+
 ```
 
 In the above figure, the packages with reverse dependencies 
@@ -86,11 +87,6 @@ from CRAN and BioC are shown in green.
 
 saveNetwork(vn, "vn.html")
 webshot("vn.html", "revDepNet-60.png", delay = 60)
-
-## Display bitmap network
-pp <- readPNG("revDepNet-60.png")
-plot.new() 
-rasterImage(pp,0,0,1,1)
 
 ```
 
