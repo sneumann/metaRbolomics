@@ -8,11 +8,9 @@ output:
 ---
 
 ```{r setup, cache=TRUE}
-knitr::opts_chunk$set(echo = TRUE)
 options("repos" = list(CRAN="http://cran.rstudio.com/"))
 
 library(devtools)   # for revdp()
-#library(miniCRAN)  
 library(igraph)     # for graph_from_edgelist/( and simplify() )
 library(visNetwork) # for visNetwork() and friends
 library(networkD3)  # for saveNetwork()
@@ -89,6 +87,10 @@ saveNetwork(vn, "vn.html")
 webshot("vn.html", "revDepNet-60.png", delay = 60)
 
 ```
+
+The source code for this page is on GitHub at (github.com/sneumann/metaRbolomics)[https://github.com/sneumann/metaRbolomics]
+
+A recent rendered output it at 
 
 This page was created with the following packages:
 
