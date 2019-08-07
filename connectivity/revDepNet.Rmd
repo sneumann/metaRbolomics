@@ -88,9 +88,14 @@ webshot("vn.html", "revDepNet-60.png", delay = 60)
 
 ```
 
-The source code for this page is on GitHub at (github.com/sneumann/metaRbolomics)[https://github.com/sneumann/metaRbolomics]
+The source code for this page is on GitHub at [github.com/sneumann/metaRbolomics](https://github.com/sneumann/metaRbolomics)
 
-A recent rendered output it at 
+The HTML output is shown at 
+[sneumann.github.io/metaRbolomics/revDepNet.html](https://sneumann.github.io/metaRbolomics/revDepNet.html)
+
+and
+
+[sneumann.github.io/metaRbolomics/vn.html](https://sneumann.github.io/metaRbolomics/vn.html)
 
 This page was created with the following packages:
 
