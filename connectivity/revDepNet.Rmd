@@ -49,7 +49,7 @@ such reverse dependency.
 ## Remove packages with most reverse dependencies 
 ## which would dominate the network
 
-el <- el[! el[,"Package"] %in% c("Rcpp", "igraph", "vegan", "caret", "rJava"), ]
+el <- el[! el[,"Package"] %in% c("Rcpp", "igraph", "vegan", "caret", "rJava", "reticulate"), ]
 
 ## Create graph, and simplify redundancy
 g <- graph_from_edgelist(el, directed = TRUE)
