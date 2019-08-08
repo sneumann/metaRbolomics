@@ -77,9 +77,7 @@ vn
 
 ```
 
-In the above figure, the packages with reverse dependencies 
-from the review are shown as blue nodes. Their (reverse) dependencies 
-from CRAN and BioC are shown in green.
+Figure 2: Dependency network of R packages. Shown in blue are packages mentioned in the review. Edges connect to packages that depend on another package, as long as that is in CRAN or BioC. Green nodes correspond to packages in CRAN or BioC not covered in the review. Not shown are 1) infrastructure packages e.g. rJava, Rcpp 2) packages from the review without reverse dependencies and 3) data packages. Some packages from the review are not in current versions of CRAN or BioC. An interactive version of this figure is available from https://sneumann.github.io/metaRbolomics/revDepNet.html .
 
 ```{r fileVis}
 
