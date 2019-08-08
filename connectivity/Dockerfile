@@ -2,11 +2,18 @@ FROM bioconductor/release_metabolomics2:R3.6.0_Bioc3.9
 
 RUN apt-get -y update && apt-get -y install chromium chromium-l10n
 
-WORKDIR /metaRbolomics
+# Install dependency packages
+COPY install.R  /connectivity/
+RUN R -e "source('/connectivity/install.R')"
 
-ADD install.R README.md packages.Rmd Makefile AllMetaRbolomicsTables.csv revDepNet.Rmd /metaRbolomics/
+# Install Vignettes 
+COPY AllMetaRbolomicsTables.csv miniMetabolomicsHelper.R README.md revDepNet.Rmd packages.Rmd  /connectivity/
+RUN mkdir /docs
 
-RUN R -e "source('install.R')"
+WORKDIR /connectivity
+
+
+
 
 
 

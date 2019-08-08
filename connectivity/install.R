@@ -5,6 +5,6 @@ install.packages(c("fastmap", "miniCRAN","igraph","magrittr","networkD3",
 # Webshot and dependencies
 install.packages(c("fastmap", "later", "promises"), 
                  repos="https://cran.r-project.org")
-devtools::install_github("rstudio/websocket", upgrade = "all")
-devtools::install_github("rstudio/webshot2", upgrade = "all")
+devtools::install_github("rstudio/websocket", upgrade = "always")
+devtools::install_github("rstudio/webshot2", upgrade = "always")
 
