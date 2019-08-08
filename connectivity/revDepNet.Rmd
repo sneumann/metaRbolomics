@@ -14,8 +14,11 @@ library(devtools)   # for revdp()
 library(igraph)     # for graph_from_edgelist/( and simplify() )
 library(visNetwork) # for visNetwork() and friends
 library(networkD3)  # for saveNetwork()
+library(chromote)   # for default_chromote_object()
 library(webshot2)   # for webshot()
 library(png)        # For displaying an image
+
+set_default_chromote_object(Chromote$new(browser = Chrome$new(args = "--no-sandbox")))
 
 ```
 
