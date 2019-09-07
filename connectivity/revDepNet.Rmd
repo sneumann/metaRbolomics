@@ -7,6 +7,8 @@ output:
   pdf_document: default
 ---
 
+# Libraries and settings
+
 ```{r setup, cache=TRUE}
 options("repos" = list(CRAN="http://cran.rstudio.com/"))
 
@@ -17,21 +19,30 @@ library(networkD3)  # for saveNetwork()
 library(chromote)   # for default_chromote_object()
 library(webshot2)   # for webshot()
 library(png)        # For displaying an image
+library(dplyr)
+library(purrr)
+
+source("revDepNetHelper.R")
 
 set_default_chromote_object(Chromote$new(browser = Chrome$new(args = "--no-sandbox")))
-
 ```
 
 
-```{r packages, cache=TRUE}
 
-## Read package names from our tables in the review
-##
+# Read package names from our table
+
+```{r packages, cache=TRUE}
 reviewTables <- read.delim("AllMetaRbolomicsTables.csv", stringsAsFactors = FALSE)
 reviewPkgs <- reviewTables[,"Package"]
 
 pkgs <- reviewPkgs
+```
 
+
+# Get reverse dependencies
+## For CRAN and BioC packages
+
+```{r revdev, cache=TRUE}
 el <- sapply(pkgs, function(pkg) {
   rd <- revdep(pkg, dependencies = c("Depends", "Imports", "LinkingTo"), 
                recursive = FALSE, ignore = NULL, bioconductor = TRUE)
@@ -39,6 +50,30 @@ el <- sapply(pkgs, function(pkg) {
 })
 el <- do.call(rbind, el)
 ```
+
+
+
+## For GitHub and GitLab
+
+The above `devtools::revdep`  cannot read from GitHub/GitLab repositories.
+We have a helper function that downloads and parses the DESCRIPTION file from GitHub/GitLab.
+Since we cannot get reverse dependencies directly for GitHub/GitLab packages, those packages they are only used as additional reverse depedencies for the CRAN/BioC packages.
+
+```{r revdev_git, cache=TRUE}
+gitdeps_reverse <- reviewTables %>% 
+                      mutate(dep_tree = map(Code_link, get_git_deps)) %>% 
+                      pull(dep_tree) %>% 
+                      bind_rows() %>% 
+                      filter(Dep %in% el[,"Package"]) %>% 
+                      rename(Package = Dep, ReverseDep = Package) %>% 
+                      as.matrix()
+
+el <- rbind(el, gitdeps_reverse)
+```
+
+
+
+# Building dependency network
 
 In total, we were analysing `r length(pkgs)` packages.
 For each package, this returns the set of packages in CRAN or BioC that depend on, import from or link to the package (i.e., its direct reverse dependencies) using the `devtools::revdep()` function. A few packages with the highest number of reverse dependencies have been excluded, as they would dominate the visualisation. 
@@ -56,7 +91,7 @@ el <- el[! el[,"Package"] %in% c("Rcpp", "igraph", "vegan", "caret", "rJava", "r
 
 ## Create graph, and simplify redundancy
 g <- graph_from_edgelist(el, directed = TRUE)
-g <- simplify(g, remove.multiple = TRUE, remove.loops = TRUE)
+g <- igraph::simplify(g, remove.multiple = TRUE, remove.loops = TRUE)
 
 # get data and plot :
 data <- toVisNetworkData(g)
@@ -77,10 +112,13 @@ vn <- visNetwork(nodes = data$nodes,
   visOptions(highlightNearest = TRUE)
 
 vn
-
 ```
 
-Figure 2: Dependency network of R packages. Shown in blue are packages mentioned in the review. Edges connect to packages that depend on another package, as long as that is in CRAN or BioC. Green nodes correspond to packages in CRAN or BioC not covered in the review. Not shown are 1) infrastructure packages e.g. rJava, Rcpp 2) packages from the review without reverse dependencies and 3) data packages. Some packages from the review are not in current versions of CRAN or BioC. An interactive version of this figure is available from https://sneumann.github.io/metaRbolomics/revDepNet.html .
+Figure 2: Dependency network of R packages. Shown in blue are packages mentioned in the review. Edges connect to packages that depend on another package, as long as that is in CRAN or BioC. Green nodes correspond to packages in CRAN or BioC not covered in the review. Not shown are 1) infrastructure packages e.g. rJava, Rcpp 2) packages from the review without reverse dependencies and 3) data packages. Some packages from the review are not in current versions of CRAN or BioC. An interactive version of this figure is available from https://sneumann.github.io/metaRbolomics/revDepNet.html.
+
+
+
+# Save network plot
 
 ```{r fileVis}
 
@@ -88,6 +126,10 @@ saveNetwork(vn, "vn.html")
 webshot("vn.html", "revDepNet-60.png", delay = 60)
 
 ```
+
+
+
+# Notes
 
 The source code for this page is on GitHub at [github.com/sneumann/metaRbolomics](https://github.com/sneumann/metaRbolomics)
 
