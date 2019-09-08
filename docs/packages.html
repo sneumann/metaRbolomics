@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 <meta name="author" content="Steffen Neumann" />
@@ -270,7 +271,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -344,18 +344,6 @@ summary {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
@@ -391,7 +379,7 @@ packagesAndViews &lt;- allPackagesInViews(url)
 
 vpkgs &lt;- lapply(views, function(view) packagesInView(view, packagesAndViews=packagesAndViews))
 names(vpkgs) &lt;- views</code></pre>
-<p>The Comprehensive R Archive Network (better known as CRAN) repository contains more than 14516 packages for many application areas.</p>
+<p>The Comprehensive R Archive Network (better known as CRAN) repository contains more than 14888 packages for many application areas.</p>
 <table>
 <thead>
 <tr class="header">
@@ -402,15 +390,15 @@ names(vpkgs) &lt;- views</code></pre>
 <tbody>
 <tr class="odd">
 <td>CRAN</td>
-<td align="right">14516</td>
+<td align="right">14888</td>
 </tr>
 <tr class="even">
 <td>BioC</td>
-<td align="right">1735</td>
+<td align="right">1731</td>
 </tr>
 </tbody>
 </table>
-<p>On BioC, packages are sorted (by their respective authors) into “BioC Views”, where the most relevant ones for metabolomics are Cheminformatics (11), Lipidomics (11), SystemsBiology (67) and, of course, Metabolomics (56).</p>
+<p>On BioC, packages are sorted (by their respective authors) into “BioC Views”, where the most relevant ones for metabolomics are Cheminformatics (11), Lipidomics (11), SystemsBiology (67) and, of course, Metabolomics (55).</p>
 <table>
 <thead>
 <tr class="header">
@@ -421,7 +409,7 @@ names(vpkgs) &lt;- views</code></pre>
 <tbody>
 <tr class="odd">
 <td>Metabolomics</td>
-<td align="right">56</td>
+<td align="right">55</td>
 </tr>
 <tr class="even">
 <td>Cheminformatics</td>
@@ -441,36 +429,31 @@ names(vpkgs) &lt;- views</code></pre>
 <h2>SessionInfo</h2>
 <p>This page was created with the following packages:</p>
 <pre class="r"><code>sessionInfo()</code></pre>
-<pre><code>## R Under development (unstable) (2019-03-05 r76199)
-## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: Ubuntu 18.04.2 LTS
+<pre><code>## R version 3.6.0 (2019-04-26)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 16299)
 ## 
 ## Matrix products: default
-## BLAS: /vol/R/R-devel/lib/R/lib/libRblas.so
-## LAPACK: /vol/R/R-devel/lib/R/lib/libRlapack.so
 ## 
 ## locale:
-##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
-##  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
-##  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
-##  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+## [1] LC_COLLATE=Danish_Denmark.1252  LC_CTYPE=Danish_Denmark.1252   
+## [3] LC_MONETARY=Danish_Denmark.1252 LC_NUMERIC=C                   
+## [5] LC_TIME=Danish_Denmark.1252    
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] miniCRAN_0.2.11
+## [1] miniCRAN_0.2.12
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_1.0.1         XML_3.98-1.19      digest_0.6.18     
-##  [4] R6_2.4.0           magrittr_1.5       evaluate_0.13     
-##  [7] httr_1.4.0         stringi_1.4.3      rmarkdown_1.12    
-## [10] tools_3.6.0        stringr_1.4.0      igraph_1.2.4.1    
-## [13] xfun_0.7           yaml_2.2.0         compiler_3.6.0    
-## [16] pkgconfig_2.0.2    BiocManager_1.30.4 htmltools_0.3.6   
-## [19] knitr_1.22</code></pre>
+##  [1] Rcpp_1.0.2         XML_3.98-1.19      digest_0.6.19     
+##  [4] assertthat_0.2.1   R6_2.4.0           magrittr_1.5      
+##  [7] evaluate_0.13      httr_1.4.0         stringi_1.4.3     
+## [10] rmarkdown_1.15     tools_3.6.0        stringr_1.4.0     
+## [13] igraph_1.2.4.1     xfun_0.7           yaml_2.2.0        
+## [16] compiler_3.6.0     pkgconfig_2.0.2    BiocManager_1.30.4
+## [19] htmltools_0.3.6    knitr_1.23</code></pre>
 </div>
 
 
@@ -490,6 +473,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
