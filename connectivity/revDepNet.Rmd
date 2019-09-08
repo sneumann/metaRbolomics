@@ -104,8 +104,7 @@ data$nodes <- cbind(data$nodes,
 
 vn <- visNetwork(nodes = data$nodes, 
                  edges = data$edges,
-                 width=1000, height=1000,
-                 ) %>% 
+                 width=1000, height=1000) %>% 
   visPhysics(timestep = 0.3,
              barnesHut = list(centralGravity=0.35,
                               springLength = 95)) %>% 
@@ -124,6 +123,21 @@ Figure 2: Dependency network of R packages. Shown in blue are packages mentioned
 
 saveNetwork(vn, "vn.html")
 webshot("vn.html", "revDepNet-60.png", delay = 60)
+
+```
+
+```{r fileVisZoom}
+
+vnZoom <- visNetwork(nodes = data$nodes, 
+                 edges = data$edges,
+                 width=1000, height=1000) %>% 
+    visIgraphLayout()%>%
+    visEvents(type="once", startStabilizing = 'function() {
+              this.fit({nodes:["ptw", "Rnmr1D", "RpeakChrom", "alsace", 
+                               "PepsNMR", "ASICS", "MODIS", "RGCxGC"]})
+            }')
+saveNetwork(vnZoom, "vnZoom.html")
+webshot("vnZoom.html", "revDepNet-zoom.png", delay = 5)
 
 ```
 
